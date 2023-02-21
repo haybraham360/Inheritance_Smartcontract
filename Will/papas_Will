@@ -1,0 +1,47 @@
+pragma solidity ^0.5.7; 
+
+contract Will{
+    address owner;
+    uint fortune;
+    bool deceased;
+
+    constructor() payable public{
+        owner = msg.sender; //msg sender represents address that is being called
+        fortune = msg.value; // msg value tells us how much ether is being sent
+        deceased = false;
+    }
+    // create modifier so the only person that can call the contract is the owner
+    modifier onlyOwner{
+        require(msg.sender == owner);
+        _;
+    }
+    modifier mustBeDeceased{
+        require(true == deceased);
+        _;
+    }
+    // create a list to store the wallet address of those that will be inheriting the ethereum
+    address payable[] familyWallets;
+
+    //map through inheritance
+    mapping(address => uint)inheritance;
+
+    //set inheritance for each address
+    function setInheritance(address payable wallet, uint amount) public{
+        familyWallets.push(wallet);
+        inheritance[wallet] = amount;
+    }
+    //pay each family member based on their wallet address
+    function payout() private mustBeDeceased{
+        //using a for loop  we can loop through this and set conditions
+        for(uint i=0; i<familyWallets.length; i++){
+            familyWallets[i].transfer(inheritance[familyWallets[i]]);
+            //transfer funds from contract address to reciever's address
+        }
+    }
+    function hasDeceased() public onlyOwner{
+        deceased = true;
+        payout();
+    }
+
+    // create modifier if we can allocate funds if friend's gramps deceased
+}
